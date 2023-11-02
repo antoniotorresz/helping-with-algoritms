@@ -111,8 +111,7 @@ def mostrar_hoja_jugador(jugador):
         # Convierte el diccionario en una lista de listas
         tabla = [['Personaje', 'Arma', 'Lugar']]
         if personajes_registrados == lugares_registrados == armas_registradas:
-            for idx in range(personajes_registrados - 1):
-                import pdb; pdb.set_trace()
+            for idx in range(personajes_registrados):
                 tabla.append([hoja['personajes'][idx], hoja['armas'][idx], hoja['lugares'][idx]])
             print(tabulate(tabla, headers='firstrow', tablefmt='pretty'))
     else:
@@ -137,7 +136,7 @@ def jugar_vs_amigo():
             
             verificar_cartas_jugador_rival(obtener_rival(jugador_activo), personaje_seleccionado, arma_seleccionada, lugar_seleccionado)
             print('Fin de tu turno')
-            anotar_hoja = str(input('Ahora tienes 2 opciones:\na)Anotar en la hoja\nb)Continuar jugando'))
+            anotar_hoja = str(input('Ahora tienes 2 opciones:\na)Anotar en la hoja\nb)Continuar jugando '))
             if anotar_hoja.lower() == 'a':
                 jugadores[jugador_activo]['hoja']['personajes'].append(str(input('Anote en la hoja el nombre del criminal: ')).capitalize())
                 jugadores[jugador_activo]['hoja']['armas'].append(str(input('Anote en la hoja el arma que usó: ')).capitalize())
@@ -158,7 +157,83 @@ def jugar_vs_amigo():
                 break
             else:
                 print(f'{jugadores[jugador_activo]["nombre"]}, Usted acaba de perder, por default ganó: {jugadores[obtener_rival(jugador_activo)]["nombre"]}.\n Quien cometió el crimen tenía estos datos: {sobre}')
+                reintentar = str(input('Reintentar?\na)Si\nb)no'))
+                if reintentar == 'a':
+                    jugador_activo = obtener_rival(jugador_activo) #continuamos con el juego
+                else:
+                    break
+        if opcion == 'c':
+            mostrar_hoja_jugador(jugador_activo)
+        if opcion == 'd':
+            break
+
+def jugar_vs_cpu():
+    jugador_activo = 'jugador1'
+    turnos_cpu = 1 
+    turnos_cpu_hasta_acusar = randint(3, 20) #minimo 3 turnos y maximo 20
+    while (True):
+        print(f'{"#" * 10} es el turno de {jugadores[jugador_activo]["nombre"]}')
+        menu()
+        if turnos_cpu == turnos_cpu_hasta_acusar:
+            cpu_personaje = choice(todas_las_cartas['personajes'])
+            cpu_arma = choice(todas_las_cartas['armas'])
+            cpu_lugar = choice(todas_las_cartas['lugares'])
+            print(f'CPU ha decidido acusar con estas cartas: {cpu_personaje}, {cpu_arma}, {cpu_lugar}')
+            if cpu_personaje == sobre['personaje'] and cpu_arma == sobre['arma'] and cpu_lugar == sobre['lugar']:
+                print(f'{jugadores[jugador_activo]["nombre"]}, acaba de descrubir el crimen, y se ganó una condecoración por parte de la policia!')
+            else:
+                print(f'CPU perdió la esperanza de ganar y decidió rendirse, por default gana {jugadores[obtener_rival(jugador_activo)]["nombre"]}')
                 break
+        elif jugador_activo == 'jugador2' and turnos_cpu < turnos_cpu_hasta_acusar:
+            cpu_personaje = choice(todas_las_cartas['personajes'])
+            cpu_arma = choice(todas_las_cartas['armas'])
+            cpu_lugar = choice(todas_las_cartas['lugares'])
+            jugadores[jugador_activo]['hoja']['personajes'].append(cpu_personaje)
+            jugadores[jugador_activo]['hoja']['armas'].append(cpu_arma)
+            jugadores[jugador_activo]['hoja']['lugares'].append(cpu_lugar)
+            print("CPU ha decidido escribir en su hoja.")
+            turnos_cpu += 1
+            jugador_activo = obtener_rival(jugador_activo)
+            continue
+        else:
+            opcion = str(input())
+
+        if opcion.lower() == 'a':
+            print(f'Sabiendo que todas las posibilidades son: {todas_las_cartas}')
+            print('Usted está suponiendo que: ')
+            
+            personaje_seleccionado = str(input('La persona que cometió el crimen fue: ')).capitalize()
+            arma_seleccionada = str(input('Usó esta arma: ')).capitalize()
+            lugar_seleccionado = str(input('Y cometió el crimen en este lugar de la mansión: ')).capitalize()
+            
+            verificar_cartas_jugador_rival(obtener_rival(jugador_activo), personaje_seleccionado, arma_seleccionada, lugar_seleccionado)
+            print('Fin de tu turno')
+            anotar_hoja = str(input('Ahora tienes 2 opciones:\na)Anotar en la hoja\nb)Continuar jugando '))
+            if anotar_hoja.lower() == 'a':
+                jugadores[jugador_activo]['hoja']['personajes'].append(str(input('Anote en la hoja el nombre del criminal: ')).capitalize())
+                jugadores[jugador_activo]['hoja']['armas'].append(str(input('Anote en la hoja el arma que usó: ')).capitalize())
+                jugadores[jugador_activo]['hoja']['lugares'].append(str(input('Anote en la hoja el lugar donde pasó: ')).capitalize())
+                print('Registraste éste renglon en la hoja.')
+            jugador_activo = obtener_rival(jugador_activo)
+
+        if opcion.lower() == 'b':
+            print(f'Sabiendo que todas las posibilidades son: {todas_las_cartas}')
+            print('Usted está acusando y confirma que: ')
+            
+            personaje_seleccionado = str(input('La persona que cometió el crimen fue: ')).capitalize()
+            arma_seleccionada = str(input('Usó esta arma: ')).capitalize()
+            lugar_seleccionado = str(input('Y cometió el crimen en este lugar de la mansión: ')).capitalize()
+            
+            if(sobre['personaje'] == personaje_seleccionado and sobre['arma'] == arma_seleccionada and sobre['lugar'] == lugar_seleccionado):
+                print(f'{jugadores[jugador_activo]["nombre"]}, acabas de descrubir el crimen, ganaste una condecoración por parte de la policia!')
+                break
+            else:
+                print(f'{jugadores[jugador_activo]["nombre"]}, Usted acaba de perder, por default ganó: {jugadores[obtener_rival(jugador_activo)]["nombre"]}.\n Quien cometió el crimen tenía estos datos: {sobre}')
+                reintentar = str(input('Reintentar?\na)Si\nb)no'))
+                if reintentar == 'a':
+                    jugador_activo = obtener_rival(jugador_activo) #continuamos con el juego
+                else:
+                    break
         if opcion == 'c':
             mostrar_hoja_jugador(jugador_activo)
         if opcion == 'd':
@@ -192,7 +267,8 @@ if __name__ == "__main__":
         if modo_juego.lower() == 'b':
             jugadores['jugador1']['nombre'] = str(input('Ingrese el nombre del jugador 1:'))
             jugadores['jugador2']['nombre'] = 'CPU'
-        
+            barajar()
+            jugar_vs_cpu()        
         print('Gracias por jugar.')
     else:
         print("No ingresó opcion para jugar...")
